@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Crush Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome for UI Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* =========================================
+       GLOBAL STYLES & RESET
+       ========================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0f0c29; 
+      background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+      overflow: hidden; 
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* =========================================
+       DYNAMIC WELCOME SCREEN
+       ========================================= */
+    #welcome-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 12, 41, 0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+
+    .welcome-content {
+      text-align: center;
+      animation: popIn 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    }
+
+    .welcome-title {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #ff007f, #00f2fe, #ff0844);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      color: #d1d1d1;
+      font-weight: 300;
+    }
+
+    .enter-btn {
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.4s ease;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .enter-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05) translateY(-5px);
+      box-shadow: 0 15px 40px 0 rgba(0, 242, 254, 0.4);
+      border-color: #00f2fe;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8) translateY(50px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* =========================================
+       LIQUID BACKGROUND BLOBS
+       ========================================= */
+    .liquid-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      filter: blur(60px);
+      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+      animation: morph 10s infinite alternate, float 8s infinite alternate ease-in-out;
+      opacity: 0.8;
+      transition: transform 0.2s ease-out;
+    }
+
+    .blob1 { width: 450px; height: 450px; background: linear-gradient(135deg, #ff007f, #ff0844); top: -10%; left: -5%; }
+    .blob2 { width: 500px; height: 500px; background: linear-gradient(135deg, #00f2fe, #4facfe); bottom: -15%; right: -10%; animation-delay: -3s; }
+    .blob3 { width: 350px; height: 350px; background: linear-gradient(135deg, #7f00ff, #e100ff); top: 40%; left: 40%; animation-delay: -5s; animation-duration: 12s; }
+
+    @keyframes morph {
+      0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+      50% { border-radius: 60% 40% 30% 70% / 60% 50% 40% 50%; }
+      100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(100px, 80px) rotate(20deg); }
+    }
+
+    /* =========================================
+       GLASSMORPHISM FORM CARD
+       ========================================= */
+    .form-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 1s ease, transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+      pointer-events: none;
+    }
+
+    .form-container.active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      border-left: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+    }
+
+    .glass-card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .input-group {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      font-weight: 400;
+      color: #e0e0e0;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Input Fields with Icons inside */
+    .input-icon-wrapper {
+      position: relative;
+    }
+
+    .input-icon-wrapper i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+      transition: color 0.3s;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px 15px 15px 45px; /* Extra left padding for the icon */
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      outline: none;
+      font-size: 1rem;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+    
+    ::placeholder { color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; }
+    
+    input:focus {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    input:focus + i, input:focus ~ i {
+      color: #00f2fe; /* Icon glows when typing */
+    }
+
+    /* Beautiful Toggle Buttons for Sex Selection (Max 2 Options) */
+    .gender-selection {
+      display: flex;
+      gap: 15px;
+    }
+
+    .gender-option {
+      flex: 1;
+      position: relative;
+    }
+
+    .gender-option input {
+      display: none; /* Hide default radio circles */
+    }
+
+    .gender-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    .gender-label i {
+      font-size: 1.2rem;
+    }
+
+    /* When Selected/Checked */
+    .gender-option input:checked + .gender-label {
+      background: rgba(0, 242, 254, 0.25);
+      border: 1px solid #00f2fe;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .gender-option input:checked + .gender-label.boy { border-color: #4facfe; box-shadow: 0 0 15px rgba(79, 172, 254, 0.4); }
+    .gender-option input:checked + .gender-label.girl { border-color: #ff0844; box-shadow: 0 0 15px rgba(255, 8, 68, 0.4); background: rgba(255, 8, 68, 0.25); }
+
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(45deg, #00f2fe, #4facfe);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 242, 254, 0.6);
+      background: linear-gradient(45deg, #4facfe, #00f2fe);
+    }
+
+    /* Loader */
+    .loader {
+      display: none;
+      margin-top: 20px;
+      font-size: 1rem;
+      color: #00f2fe;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; text-shadow: 0 0 10px #00f2fe; }
+      100% { opacity: 0.6; }
+    }
+
+    /* =========================================
+       CUSTOM TOAST NOTIFICATION
+       ========================================= */
+    #toast {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 242, 254, 0.2);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(0, 242, 254, 0.5);
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #toast.show { bottom: 40px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- DYNAMIC WELCOME SCREEN -->
+  <div id="welcome-screen">
+    <div class="welcome-content">
+      <h1 class="welcome-title"><i class="fa-solid fa-user-secret"></i> Secret Crush Vault</h1>
+      <p class="welcome-subtitle">A safe, encrypted space to drop your secret.</p>
+      <button class="enter-btn" onclick="enterVault()">Enter Vault <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- LIQUID BACKGROUND -->
+  <div class="liquid-bg">
+    <div class="blob blob1" id="b1"></div>
+    <div class="blob blob2" id="b2"></div>
+    <div class="blob blob3" id="b3"></div>
+  </div>
+
+  <!-- GLASSMORPHISM FORM -->
+  <div class="form-container" id="main-form">
+    <div class="glass-card">
+      <h2><i class="fa-solid fa-envelope-open-text"></i> Confession Time</h2>
+      
+      <form id="crush-form" name="submit-to-google-sheet">
+        
+        <!-- Max 2 Selections: Beautiful Icon Buttons -->
+        <div class="input-group">
+          <label>What is your Sex?</label>
+          <div class="gender-selection">
+            <label class="gender-option">
+              <input type="radio" name="sex" value="Boy" required>
+              <div class="gender-label boy">
+                <i class="fa-solid fa-mars"></i> Boy
+              </div>
+            </label>
+            <label class="gender-option">
+              <input type="radio" name="sex" value="Girl" required>
+              <div class="gender-label girl">
+                <i class="fa-solid fa-venus"></i> Girl
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Name Input with Chinese Regex Filter and Icon -->
+        <div class="input-group">
+          <label for="name">Your Chinese Name (中文姓名)</label>
+          <div class="input-icon-wrapper">
+            <input type="text" id="name" name="name" placeholder="請輸入中文姓名 (e.g. 陳大文)" 
+                   pattern="^[\u4e00-\u9fa5]+$" 
+                   title="Please enter a valid Chinese name (Chinese characters only)." required>
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+
+        <!-- Crush Input with Icon -->
+        <div class="input-group">
+          <label for="crush">Who do you like?</label>
+          <div class="input-icon-wrapper">
+            <input type="text" id="crush" name="crush" placeholder="Name of the person you like" required>
+            <i class="fa-solid fa-heart"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          Lock it in! <i class="fa-solid fa-lock"></i>
+        </button>
+        <div class="loader" id="loader"><i class="fa-solid fa-spinner fa-spin"></i> Encrypting & Uploading... </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CUSTOM NOTIFICATION POPUP -->
+  <div id="toast"><i class="fa-solid fa-circle-check"></i> Sent to the Vault Successfully!</div>
+
+  <script>
+    /* --- WELCOME SCREEN LOGIC --- */
+    function enterVault() {
+      const welcomeScreen = document.getElementById('welcome-screen');
+      const mainForm = document.getElementById('main-form');
+      
+      welcomeScreen.style.opacity = '0';
+      welcomeScreen.style.visibility = 'hidden';
+      
+      setTimeout(() => {
+        mainForm.classList.add('active');
+      }, 300);
+    }
+
+    /* --- DYNAMIC MOUSE TRACKING FOR BLOBS --- */
+    document.addEventListener('mousemove', function(e) {
+      const b1 = document.getElementById('b1');
+      const b2 = document.getElementById('b2');
+      
+      const x = (e.clientX / window.innerWidth - 0.5) * 40;
+      const y = (e.clientY / window.innerHeight - 0.5) * 40;
+      
+      b1.style.transform = `translate(${x * 2}px, ${y * 2}px)`;
+      b2.style.transform = `translate(${-x * 3}px, ${-y * 3}px)`;
+    });
+
+    /* --- GOOGLE SHEETS UPLOAD LOGIC --- */
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbycdQ_PUgPhFQUDtZ0VlGDadvvXqr-P6hs-CiJF68EjDBzfUGyJZvDLQIQrqcBIJvHKHg/exec';
+    
+    const form = document.forms['submit-to-google-sheet'];
+    const btn = document.getElementById('submit-btn');
+    const loader = document.getElementById('loader');
+    const toast = document.getElementById('toast');
+
+    function showToast(message, isError = false) {
+      toast.innerHTML = isError ? `<i class="fa-solid fa-circle-xmark"></i> ${message}` : `<i class="fa-solid fa-circle-check"></i> ${message}`;
+      toast.style.background = isError ? 'rgba(255, 8, 68, 0.2)' : 'rgba(0, 242, 254, 0.2)';
+      toast.style.borderColor = isError ? 'rgba(255, 8, 68, 0.5)' : 'rgba(0, 242, 254, 0.5)';
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault(); 
+      
+      btn.style.display = 'none';
+      loader.style.display = 'block';
+
+      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => {
+          showToast('Locked in! Uploaded to Google Sheets.');
+          form.reset(); 
+          
+          btn.style.display = 'flex';
+          loader.style.display = 'none';
+        })
+        .catch(error => {
+          console.error('Error!', error.message);
+          showToast('Oops! Something went wrong.', true);
+          
+          btn.style.display = 'flex';
+          loader.style.display = 'none';
+        });
+    });
+  </script>
+</body>
+</html>
